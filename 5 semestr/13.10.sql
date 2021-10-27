@@ -34,11 +34,14 @@ WITH Count_Books_By_Departments(id_издательства, [Год издания], [Кол-во книг]) A
 )
 SELECT А.id_автора
 FROM Авторы А JOIN [Книга Автор] К_А ON А.id_автора = К_А.id_автора JOIN Книги К ON К.id_книги = К_А.id_книги JOIN Count_Books_By_Departments CBBD ON К.id_издательства = CBBD.id_издательства
-GROUP BY А.id_автора, YEAR(К.[Год издания])
-HAVING YEAR(К.[Год издания]) = MIN(CBBD.[Год издания])
+WHERE CBBD.[Кол-во книг] = (
+								SELECT MIN([Кол-во книг])
+								FROM Count_Books_By_Departments
+						   )
 
 --Найти читателей, которые были в библиотеке в те дни, в которые в библиотеку приходил Иванов И.И. (Читатель может прийти только сдать книги, только взять книги, взять и сдать книги)
-SELECT Ч_К.id_читателя
+--МОЖНО СВЯЗАТЬ 2 ТАБЛИЦЫ
+SELECT DISTINCT Ч_К.id_читателя
 FROM Читатель_Книга Ч_К
 WHERE Ч_К.[Дата выдачи] IN (
 							SELECT [Дата выдачи]
@@ -69,6 +72,6 @@ WITH Date_Visiting_Library(id_читателя, [Дата посещения]) AS(
 	FROM Читатели Ч JOIN Читатель_Книга ЧК ON ЧК.id_читателя = Ч.id_читателя
 	WHERE Ч.Фамилия + ' ' + LEFT(Ч.Имя, 1) + '. ' + LEFT(Ч.Отчество, 1) + '.' = 'Иванов И. И.'
 )
-SELECT ЧК.id_читателя
+SELECT DISTINCT ЧК.id_читателя
 FROM Читатель_Книга ЧК JOIN Date_Visiting_Library DVL ON DVL.id_читателя <> ЧК.id_читателя
 WHERE ЧК.[Дата выдачи] = DVL.[Дата посещения] OR ЧК.[Дата возврата факт] = DVL.[Дата посещения];
