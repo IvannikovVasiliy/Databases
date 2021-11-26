@@ -3,15 +3,32 @@
 --33.Выбрать ФИО игрока(ов), забившего наибольшее количество мячей, 
 --и ФИО игрока, который стоит вторым по количеству забитых мячей. 
 --Результирующая таблица должна содержать один столбец с ФИО.
-SELECT * /*Surname + Name + CASE
+SELECT TOP(2)Surname + Name + CASE
 							WHEN Patronomic_Name IS NULL
 							THEN ' '
 							ELSE Patronomic_Name
-						END*/
-FROM Players; 
+						END
+FROM Players
+ORDER BY 1 DESC; 
 --34.Выбрать все данные об игроках старше среднего возраста игроков.
+SELECT *
+FROM Players 
+WHERE YEAR(GETDATE()) - YEAR(Birth_date) - 
+	  CASE
+		  WHEN MONTH(GETDATE()) > MONTH(Birth_date) OR (MONTH(GETDATE()) = MONTH(Birth_date) AND DAY(GETDATE()) > DAY(Birth_date))
+		  THEN 0
+		  ELSE 1
+	  END < (SELECT SUM(YEAR(GETDATE()) - YEAR(Birth_date) - 
+			 CASE
+				  WHEN MONTH(GETDATE()) > MONTH(Birth_date) OR (MONTH(GETDATE()) = MONTH(Birth_date) AND DAY(GETDATE()) > DAY(Birth_date))
+				  THEN 0
+				  ELSE 1
+			 END) / COUNT(1)
+			 FROM Players);
 --35.Выбрать год, в который родилось больше всего людей по всей БД, 
 --т.е. учитывать директоров, тренеров, игроков.
+
+
 --36.Выбрать для каждой команды суммарный фонд оплаты труда. Учесть 
 --игроков, тренеров и др. 
 --37.Для каждой команды вывести данные матча, принесшего 
@@ -54,7 +71,8 @@ WHERE EXISTS(
 --количество игроков в команде на сегодняшний день, количество 
 --сыгранных матчей. Результата отсортировать по количеству 
 --сыгранных матчей в порядке убывания. В результирующую таблицу 
---включить все команды, имеющиеся в БД.WITH 
+--включить все команды, имеющиеся в БД.
+WITH 
 	Count_matches_column_1(id_team, count_matches_column1) AS(
 		SELECT Team.id_team, COUNT(Matches.id_team1)
 		FROM Matches JOIN Team ON Matches.id_team1 = Team.id_team
