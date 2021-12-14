@@ -6,17 +6,6 @@ CREATE TABLE Country(
 ALTER TABLE Country
 ADD CONSTRAINT PK_country_id_country PRIMARY KEY(id_country);
 
-CREATE TABLE League(
-	id_league INT NOT NULL
-	, [Name league] NVARCHAR(30) NOT NULL
-	, id_country int NOT NULL
-);
-
-ALTER TABLE League
-ADD	CONSTRAINT PK_League_id_league PRIMARY KEY(id_league)
-	, CONSTRAINT FK_League_id_country FOREIGN KEY(id_country) 
-	  REFERENCES Country(id_country);
-
 CREATE TABLE Club(
 	id_club INT NOT NULL
 	, Name_Club NVARCHAR(25) NOT NULL
@@ -25,7 +14,8 @@ CREATE TABLE Club(
 );
 
 ALTER TABLE Club
-ADD CONSTRAINT PK_club_id_club PRIMARY KEY(id_club)
+ADD CHECK(Rate BETWEEN 0 AND 5)
+	, CONSTRAINT PK_club_id_club PRIMARY KEY(id_club)
 	, CONSTRAINT FK_club_id_country FOREIGN KEY(id_country)
 	  REFERENCES Country(id_country);
 
@@ -37,7 +27,8 @@ CREATE TABLE Owner_Club(
 );
 
 ALTER TABLE Owner_Club
-ADD   CONSTRAINT FK_Own_Club_id_owner FOREIGN KEY(id_owner)
+ADD CHECK([Percent] BETWEEN 0 AND 100)
+    , CONSTRAINT FK_Own_Club_id_owner FOREIGN KEY(id_owner)
 	  REFERENCES Owners(id_owner)
 	, CONSTRAINT FK_Own_Club_id_club FOREIGN KEY(id_club)
 	  REFERENCES Club(id_club);
@@ -61,7 +52,8 @@ CREATE TABLE Team(
 );
 
 ALTER TABLE Team
-ADD CONSTRAINT PK_Team_id_team PRIMARY KEY(id_team)
+ADD CHECK(Rate BETWEEN 0 AND 5)
+	, CONSTRAINT PK_Team_id_team PRIMARY KEY(id_team)
 	, CONSTRAINT FK_Team_id_club FOREIGN KEY(id_club) 
 	  REFERENCES Club(id_club);
 
@@ -102,7 +94,8 @@ CREATE TABLE Staff_Position(
 );
 
 ALTER TABLE Staff_Position
-ADD   CONSTRAINT FK_Staff_Pos_id_team FOREIGN KEY(id_team)
+ADD CHECK([Date finish] > [Date start] OR [Date finish] <= GETDATE() OR [Date finish] IS NULL)
+	, CONSTRAINT FK_Staff_Pos_id_team FOREIGN KEY(id_team)
 	  REFERENCES Team(id_team)
 	, CONSTRAINT FK_Staff_Pos_id_pos FOREIGN KEY(id_position)
 	  REFERENCES Position(id_position)
@@ -116,7 +109,8 @@ CREATE TABLE Position(
 );
 
 ALTER TABLE Position
-ADD CONSTRAINT PK_pos_id_pos PRIMARY KEY(id_position);
+ADD CHECK(Salary > 0)
+	, CONSTRAINT PK_pos_id_pos PRIMARY KEY(id_position);
 
 CREATE TABLE Training_Base(
 	id_base INT NOT NULL
@@ -127,7 +121,8 @@ CREATE TABLE Training_Base(
 );
 
 ALTER TABLE Training_Base
-ADD CONSTRAINT PK_base_id_base PRIMARY KEY(id_base)
+ADD CHECK([Count football fields] > 0)
+	, CONSTRAINT PK_base_id_base PRIMARY KEY(id_base)
 	, CONSTRAINT FK_base_id_club FOREIGN KEY(id_club) 
 	  REFERENCES Club(id_club);
 
@@ -146,16 +141,16 @@ ADD CONSTRAINT PK_prepar_id_preparation PRIMARY KEY(id_preparation)
 	, CONSTRAINT FK_prepar_id_base FOREIGN KEY(id_base)
 	  REFERENCES Training_base(id_base);
 
-CREATE TABLE Club_Competitions(
-	id_club INT NOT NULL
+CREATE TABLE Team_Competitions(
+	id_team INT NOT NULL
 	, id_comp INT NOT NULL
 	, Season NVARCHAR(9) NOT NULL
 );
 
-ALTER TABLE Club_Competitions
-ADD CONSTRAINT FK_club_comp_id_club FOREIGN KEY(id_club)
-	REFERENCES Club(id_club)
-  , CONSTRAINT FK_club_comp_id_comp FOREIGN KEY(id_comp)
+ALTER TABLE Team_Competitions
+ADD CONSTRAINT FK_Team_comp_id_club FOREIGN KEY(id_team)
+	REFERENCES Team(id_team)
+  , CONSTRAINT FK_team_comp_id_comp FOREIGN KEY(id_comp)
     REFERENCES History_Competitions(id_comp);
 
 CREATE TABLE Competitions(
@@ -190,7 +185,8 @@ CREATE TABLE Stadium(
 );
 
 ALTER TABLE Stadium
-ADD CONSTRAINT PK_stad_id_club_stadium PRIMARY KEY(id_club_stadium)
+ADD CHECK([Count visitors] > 0)
+	, CONSTRAINT PK_stad_id_club_stadium PRIMARY KEY(id_club_stadium)
 	, CONSTRAINT FK_stad_id_club_stad FOREIGN KEY(id_club_stadium) 
 	  REFERENCES Club(id_club);
 
@@ -225,6 +221,7 @@ CREATE TABLE [Match information](
 );
 
 ALTER TABLE [Match information]
-ADD CONSTRAINT PK_info_id_play PRIMARY KEY(id_play)
+ADD   CONSTRAINT PK_info_id_play PRIMARY KEY(id_play)
 	, CONSTRAINT FK_info_id_play FOREIGN KEY(id_play)
 	  REFERENCES Matches(id_play);
+
